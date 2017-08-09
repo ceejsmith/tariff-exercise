@@ -29,6 +29,7 @@ object Cost {
     if (annualUsage == 0)
       0
     else
+      // rate is Some() because of the filter logic
       annualUsage * rate.get + 12 * standingCharge
   }
 }
