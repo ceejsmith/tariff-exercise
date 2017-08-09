@@ -3,7 +3,7 @@ package com.exercise.tariff
 import java.io.InputStream
 
 import scala.io.Source
-import cli.{CostCommand, Report, UsageCommand, parse => parseCmd}
+import cli.{CostCommand, UsageCommand, parse => parseCmd}
 import pricing.{parse => parseTariffs}
 import com.exercise.tariff.calculation.{Cost, TariffCost}
 
@@ -14,7 +14,7 @@ object Main {
   val tariffs = parseTariffs(json)
 
   def main(args: Array[String]): Unit = parseCmd(args) match {
-    case Left(Report(text)) => {
+    case Left(ErrorReport(text)) => {
       println(text)
       System.exit(1)
     }
