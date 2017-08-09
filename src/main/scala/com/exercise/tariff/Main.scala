@@ -1,25 +1,31 @@
 package com.exercise.tariff
 
-import cli.{CostCommand, Report, UsageCommand, parse => parseArgs}
+import java.io.InputStream
+
+import scala.io.Source
+import cli.{CostCommand, Report, UsageCommand, parse => parseCmd}
 import pricing.{parse => parseTariffs}
-import com.exercise.tariff.calculation.Cost
+import com.exercise.tariff.calculation.{Cost, TariffCost}
 
 object Main {
-  val json = """[
-               |  {"tariff": "better-energy", "rates": {"power":  0.1367, "gas": 0.0288}, "standing_charge": 8.33},
-               |  {"tariff": "2yr-fixed", "rates": {"power": 0.1397, "gas": 0.0296}, "standing_charge": 8.75},
-               |  {"tariff": "greener-energy", "rates": {"power":  0.1544}, "standing_charge": 8.33},
-               |  {"tariff": "simpler-energy", "rates": {"power":  0.1396, "gas": 0.0328}, "standing_charge": 8.75}
-               |]""".stripMargin
+  val stream : InputStream = getClass.getResourceAsStream("/prices.json")
+  val json = Source.fromInputStream(stream).mkString
 
   val tariffs = parseTariffs(json)
 
-  def main(args: Array[String]): Unit = parseArgs(args) match {
+  def main(args: Array[String]): Unit = parseCmd(args) match {
     case Left(Report(text)) => {
       println(text)
       System.exit(1)
     }
-    case Right(cmd @ CostCommand(_, _)) => Cost.calculate(cmd, tariffs).foreach(c => println(f"${c.name} ${c.amount}%.2f"))
+    case Right(cmd @ CostCommand(_, _)) => {
+      val costs = Cost.calculate(cmd, tariffs)
+      print(costs)
+    }
     case Right(cmd @ UsageCommand(_, _, _)) => println(cmd)
+  }
+
+  private def print(costs: Seq[TariffCost]) = {
+    costs.foreach(c => println(f"${c.name} ${c.amount}%.2f"))
   }
 }
